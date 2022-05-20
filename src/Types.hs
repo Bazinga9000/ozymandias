@@ -1,6 +1,7 @@
 module Types where
 
 import           Data.Map
+import           Vec
 
 newtype Board = Board {
     grid :: Map Pos Piece
@@ -12,6 +13,5 @@ newtype Piece = Piece {
 
 newtype Move = Move [Atom]
 newtype Pos = Pos [Int]
-newtype Vec = Vec [Int]
 
 data Atom = MoveTo Vec | CaptureAt Vec

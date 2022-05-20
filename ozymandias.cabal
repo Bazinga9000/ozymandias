@@ -25,7 +25,9 @@ source-repository head
 
 library
   exposed-modules:
+      Game
       Types
+      Vec
   other-modules:
       Paths_ozymandias
   hs-source-dirs:
