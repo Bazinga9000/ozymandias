@@ -1,17 +1,22 @@
+{-# LANGUAGE TemplateHaskell #-}
 module Types where
 
+import           Control.Lens
+import           Control.Lens.TH
 import           Data.Map
 import           Vec
 
-newtype Board = Board {
-    grid :: Map Pos Piece
-}
-
-newtype Piece = Piece {
-    mover :: Board -> [Move] -> [Move]
-}
-
+data Atom = MoveTo Vec | CaptureAt Vec
 newtype Move = Move [Atom]
 newtype Pos = Pos [Int]
 
-data Atom = MoveTo Vec | CaptureAt Vec
+newtype Board = Board {
+    _grid :: Map Pos Piece
+}
+
+newtype Piece = Piece {
+    _mover :: Board -> [Move] -> [Move]
+}
+
+makeLenses ''Board
+makeLenses ''Piece
