@@ -25,6 +25,12 @@ retypeMove t (Move as) = Move $ map (retypeAtom t) as
 concatMoves :: Move -> Move -> Move
 concatMoves (Move a) (Move b) = Move $ a ++ b
 
+singleton :: Vec -> Move
+singleton v = Move [Atom v MoveTo]
+
+fromP :: Pos -> Vec
+fromP (Pos p) = Vec p
+
 newtype Pos = Pos [Int]
 
 newtype Board = Board {

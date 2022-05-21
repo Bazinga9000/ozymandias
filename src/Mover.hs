@@ -1,6 +1,8 @@
 module Mover where
 
+import           Control.Lens
 import           Control.Monad.RWS
+import qualified Data.Map          as M
 import           Types
 import           Vec
 
@@ -15,6 +17,12 @@ emptyMover = MkMover {runMover = \_ -> put [Move []]}
 --only move is the zero move
 zeroMover :: Mover
 zeroMover = leaper vzero
+
+--mover that can go anywhere
+universalMover :: Mover
+universalMover = MkMover {runMover = \b ->
+    put $ map (singleton . fromP) (M.keys $ b ^. grid)
+    }
 
 --mover with a single direction of movement
 leaper :: Vec -> Mover
@@ -52,10 +60,3 @@ retypeMv m t = MkMover {runMover = \b -> do
     mvs <- runMover m b >> get
     put $ map (retypeMove t) mvs
     }
-
---repeat a move up to n times
-freeN :: Int -> Mover -> Mover
-freeN n m
-    | n < 0 = error "Negative value passed to freeN"
-    | n == 0 = nullMover
-    | n > 0 = m |.?| freeN (n-1) m
