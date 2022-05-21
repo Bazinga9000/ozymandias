@@ -3,11 +3,21 @@ module Types where
 
 import           Control.Lens
 import           Control.Lens.TH
+import           Control.Monad.Reader
 import           Data.Map
 import           Vec
 
-data Atom = MoveTo Vec | CaptureAt Vec
+data AtomType = MoveTo | CaptureAt
+
+data Atom = Atom Vec AtomType
+
+newtype Mover = MkMover {runMover :: Board -> [Move] -> Reader Pos [Move]}
+
 newtype Move = Move [Atom]
+
+concatMoves :: Move -> Move -> Move
+concatMoves (Move a) (Move b) = Move $ a ++ b
+
 newtype Pos = Pos [Int]
 
 newtype Board = Board {
@@ -15,7 +25,7 @@ newtype Board = Board {
 }
 
 newtype Piece = Piece {
-    _mover :: Board -> [Move] -> [Move]
+    _mover :: Mover
 }
 
 makeLenses ''Board

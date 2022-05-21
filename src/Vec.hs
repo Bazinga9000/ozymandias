@@ -13,3 +13,12 @@ vmap f (Vec a) (Vec b) = Vec $ zipWith f a b
 
 (>*) :: Int -> Vec -> Vec
 n >* Vec a = Vec $ map (*n) a
+
+vzero :: Vec
+vzero = Vec []
+
+vsum :: [Vec] -> Vec
+vsum = foldr (.+) vzero
+
+transform :: [Vec] -> Vec -> Vec
+transform vs (Vec x) = vsum $ zipWith (>*) x vs

@@ -26,6 +26,7 @@ source-repository head
 library
   exposed-modules:
       Game
+      Mover
       Types
       Vec
   other-modules:
@@ -36,6 +37,7 @@ library
       base >=4.7 && <5
     , containers
     , lens
+    , mtl
   default-language: Haskell2010
 
 executable ozymandias-exe
@@ -49,6 +51,7 @@ executable ozymandias-exe
       base >=4.7 && <5
     , containers
     , lens
+    , mtl
     , ozymandias
   default-language: Haskell2010
 
@@ -64,5 +67,6 @@ test-suite ozymandias-test
       base >=4.7 && <5
     , containers
     , lens
+    , mtl
     , ozymandias
   default-language: Haskell2010
