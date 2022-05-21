@@ -3,7 +3,7 @@ module Types where
 
 import           Control.Lens
 import           Control.Lens.TH
-import           Control.Monad.Reader
+import           Control.Monad.RWS
 import           Data.Map
 import           Vec
 
@@ -11,7 +11,8 @@ data AtomType = MoveTo | CaptureAt
 
 data Atom = Atom Vec AtomType
 
-newtype Mover = MkMover {runMover :: Board -> [Move] -> Reader Pos [Move]}
+type MoveMachine = RWS Pos () [Move]
+newtype Mover = MkMover {runMover :: Board -> MoveMachine [Move]}
 
 newtype Move = Move [Atom]
 
