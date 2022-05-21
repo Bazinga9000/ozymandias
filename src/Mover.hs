@@ -50,13 +50,13 @@ a |.?| b = a |.| (emptyMover |+| b)
 --filter out moves by some predicate
 filterMv :: Mover -> (Move -> Bool) -> Mover
 filterMv m f = MkMover {runMover = \b -> do
-    mvs <- runMover m b >> get
-    put $ filter f mvs
+    runMover m b
+    modify $ filter f
     }
 
 --change the type of all moves
 retypeMv :: Mover -> AtomType -> Mover
 retypeMv m t = MkMover {runMover = \b -> do
-    mvs <- runMover m b >> get
-    put $ map (retypeMove t) mvs
+    runMover m b
+    modify $ map (retypeMove t)
     }
