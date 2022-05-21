@@ -3,7 +3,11 @@ module Vec where
 newtype Vec = Vec [Int]
 
 vmap :: (Int -> Int -> Int) -> Vec -> Vec -> Vec
-vmap f (Vec a) (Vec b) = Vec $ zipWith f a b
+vmap f (Vec a) (Vec b) = Vec $ vzipwith f a b where
+    vzipwith f [] []         = []
+    vzipwith f [] (b:bs)     = f 0 b : vzipwith f [] bs
+    vzipwith f (a:as) []     = f a 0 : vzipwith f as []
+    vzipwith f (a:as) (b:bs) = f a b : vzipwith f as bs
 
 (.+) :: Vec -> Vec -> Vec
 (.+) = vmap (+)
