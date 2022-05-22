@@ -39,7 +39,7 @@ x |+| y = MkMover {runMover = \b -> do
 (|.|) :: Mover -> Mover -> Mover
 x |.| y = MkMover {runMover = \b -> do
     xs <- runMover x b >> get
-    ys <- runMover x b >> get
+    ys <- runMover y b >> get
     put $ liftM2 concatMoves xs ys
     }
 
