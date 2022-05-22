@@ -26,7 +26,7 @@ universalMover = MkMover {runMover = \b ->
 
 --mover with a single direction of movement
 leaper :: Vec -> Mover
-leaper v = MkMover {runMover = \_ -> put [Move [Atom v MoveTo]]}
+leaper v = MkMover {runMover = \_ -> put [singleton v]}
 
 --union
 (|+|) :: Mover -> Mover -> Mover
