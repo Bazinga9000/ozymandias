@@ -1,6 +1,7 @@
 module Mover where
 
 import           Control.Lens
+import           Control.Monad
 import           Control.Monad.RWS
 import qualified Data.Map          as M
 import           Types
@@ -43,6 +44,10 @@ fork f x y = MkMover {runMover = \b -> do
 (|+|) :: Mover -> Mover -> Mover
 x |+| y = fork (++) x y
 
+multiUnion :: [Mover] -> Mover
+multiUnion []     = nullMover
+multiUnion (m:ms) = foldr (|+|) m ms
+
 --mandatory compose, that is "do x then do y"
 (|.|) :: Mover -> Mover -> Mover
 x |.| y = MkMover {runMover = \b -> do
@@ -83,3 +88,24 @@ freeN = iterN (|.?|)
 --repeat a mover exactly n times
 freeNStrict :: Int -> Mover -> Mover
 freeNStrict = iterN (|.|)
+
+--repeat a mover until it does not change the list of moves
+free :: Mover -> Mover
+free m = MkMover {runMover = \b -> put [] >> runMover go b} where
+    go = MkMover {runMover = \b -> do
+        old <- get
+        runMover m b
+        new <- get
+        let filtered = (b ^. boardFilter) (old ++ new)
+        put filtered
+        when (filtered /= old) $ runMover go b
+    }
+
+transformMv :: [Vec] -> Mover -> Mover
+transformMv m mv = MkMover {runMover = \b -> do
+    runMover mv b
+    modify $ map $ transformMove m
+    }
+
+multiTransformMv :: [[Vec]] -> Mover -> Mover
+multiTransformMv ms mv = multiUnion $ map (`transformMv` mv) ms

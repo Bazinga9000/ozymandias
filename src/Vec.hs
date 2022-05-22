@@ -1,6 +1,6 @@
 module Vec where
 
-newtype Vec = Vec [Int]
+newtype Vec = Vec [Int] deriving Eq
 
 vmap :: (Int -> Int -> Int) -> Vec -> Vec -> Vec
 vmap f (Vec a) (Vec b) = Vec $ vzipwith f a b where
