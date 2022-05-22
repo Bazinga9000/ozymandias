@@ -76,10 +76,7 @@ retypeMv m t = MkMover {runMover = \b -> do
 
 --iteratively apply the function f n times
 iterN :: (Mover -> Mover -> Mover) -> Int -> Mover -> Mover
-iterN f n m
-    | n < 0 = error "Negative N given to iterN"
-    | n == 0 = nullMover
-    | otherwise = f m (iterN f (n-1) m)
+iterN f n m = iterate (f m) nullMover !! n
 
 --repeat a mover up to n times
 freeN :: Int -> Mover -> Mover
