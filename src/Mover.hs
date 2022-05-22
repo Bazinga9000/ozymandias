@@ -40,7 +40,7 @@ x |+| y = MkMover {runMover = \b -> do
 x |.| y = MkMover {runMover = \b -> do
     xs <- runMover x b >> get
     ys <- runMover x b >> get
-    put [concatMoves xm ym | xm <- xs, ym <- ys]
+    put $ liftM2 concatMoves xs ys
     }
 
 --optional compose, that is "do x and then you may or may not do y"
