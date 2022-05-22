@@ -28,12 +28,20 @@ universalMover = MkMover {runMover = \b ->
 leaper :: Vec -> Mover
 leaper v = MkMover {runMover = \_ -> put [singleton v]}
 
+--runs two movers with the same state, then merges their outputs
+--TODO: there is no way in hell that this is the best way to write this
+fork :: ([Move] -> [Move] -> [Move]) -> Mover -> Mover -> Mover
+fork f x y = MkMover {runMover = \b -> do
+    cs <- get
+    xs <- runMover x b >> get
+    put cs
+    ys <- runMover y b >> get
+    put $ f xs ys
+    }
+
 --union
 (|+|) :: Mover -> Mover -> Mover
-x |+| y = MkMover {runMover = \b -> do
-    m <- liftM2 (++) (runMover x b >> get) (runMover y b >> get)
-    put m
-    }
+x |+| y = fork (++) x y
 
 --mandatory compose, that is "do x then do y"
 (|.|) :: Mover -> Mover -> Mover
