@@ -68,3 +68,18 @@ retypeMv m t = MkMover {runMover = \b -> do
     runMover m b
     modify $ map (retypeMove t)
     }
+
+--iteratively apply the function f n times
+iterN :: (Mover -> Mover -> Mover) -> Int -> Mover -> Mover
+iterN f n m
+    | n < 0 = error "Negative N given to iterN"
+    | n == 0 = nullMover
+    | otherwise = f m (iterN f (n-1) m)
+
+--repeat a mover up to n times
+freeN :: Int -> Mover -> Mover
+freeN = iterN (|.?|)
+
+--repeat a mover exactly n times
+freeNStrict :: Int -> Mover -> Mover
+freeNStrict = iterN (|.|)
