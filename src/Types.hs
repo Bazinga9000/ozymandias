@@ -5,6 +5,7 @@ import           Control.Lens
 import           Control.Lens.TH
 import           Control.Monad.RWS
 import qualified Data.Map          as M
+import           Rose
 import           Vec
 
 data AtomType = MoveTo | CaptureAt deriving Eq
@@ -17,7 +18,15 @@ retypeAtom t (Atom v _) = Atom v t
 transformAtom :: [Vec] -> Atom -> Atom
 transformAtom m (Atom v t) = Atom (Vec.transform m v) t
 
-type MoveMachine = RWS Pos () [Move]
+type UnresolvedMoves = Rose (Maybe Atom)
+
+singleton :: Vec -> UnresolvedMoves
+singleton v = return $ Just $ Atom v MoveTo
+
+union :: UnresolvedMoves -> UnresolvedMoves -> UnresolvedMoves
+union = flaggedUnion Nothing
+
+type MoveMachine = RWS Pos () UnresolvedMoves
 newtype Mover = MkMover {runMover :: Board -> MoveMachine ()}
 
 newtype Move = Move [Atom] deriving Eq
@@ -33,9 +42,6 @@ transformMove m = mapMove (transformAtom m)
 
 concatMoves :: Move -> Move -> Move
 concatMoves (Move a) (Move b) = Move $ a ++ b
-
-singleton :: Vec -> Move
-singleton v = Move [Atom v MoveTo]
 
 fromP :: Pos -> Vec
 fromP (Pos p) = Vec p

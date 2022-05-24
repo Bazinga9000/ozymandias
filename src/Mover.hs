@@ -4,16 +4,17 @@ import           Control.Lens
 import           Control.Monad
 import           Control.Monad.RWS
 import qualified Data.Map          as M
+import           Rose
 import           Types
 import           Vec
 
 --no moves
 nullMover :: Mover
-nullMover = MkMover {runMover = \_ -> put []}
+nullMover = MkMover {runMover = \_ -> put $ return Nothing}
 
 --only move is a move with no atoms
 emptyMover :: Mover
-emptyMover = MkMover {runMover = \_ -> put [Move []]}
+emptyMover = MkMover {runMover = \_ -> put $ Rose Nothing [return Nothing]}
 
 --only move is the zero move
 zeroMover :: Mover
@@ -22,16 +23,16 @@ zeroMover = leaper vzero
 --mover that can go anywhere
 universalMover :: Mover
 universalMover = MkMover {runMover = \b ->
-    put $ map (singleton . fromP) (M.keys $ b ^. grid)
+    put $ Rose Nothing $ map (singleton . fromP) (M.keys $ b ^. grid)
     }
 
 --mover with a single direction of movement
 leaper :: Vec -> Mover
-leaper v = MkMover {runMover = \_ -> put [singleton v]}
+leaper v = MkMover {runMover = \_ -> put $ singleton v}
 
 --runs two movers with the same state, then merges their outputs
 --TODO: there is no way in hell that this is the best way to write this
-fork :: ([Move] -> [Move] -> [Move]) -> Mover -> Mover -> Mover
+fork :: (UnresolvedMoves -> UnresolvedMoves -> UnresolvedMoves) -> Mover -> Mover -> Mover
 fork f x y = MkMover {runMover = \b -> do
     cs <- get
     xs <- runMover x b >> get
@@ -42,7 +43,7 @@ fork f x y = MkMover {runMover = \b -> do
 
 --union
 (|+|) :: Mover -> Mover -> Mover
-x |+| y = fork (++) x y
+x |+| y = fork union x y
 
 multiUnion :: [Mover] -> Mover
 multiUnion []     = nullMover
@@ -53,25 +54,27 @@ multiUnion (m:ms) = foldr (|+|) m ms
 x |.| y = MkMover {runMover = \b -> do
     xs <- runMover x b >> get
     ys <- runMover y b >> get
-    put $ liftM2 concatMoves xs ys
+    put $ compose xs ys
     }
 
 --optional compose, that is "do x and then you may or may not do y"
 (|.?|) :: Mover -> Mover -> Mover
 a |.?| b = a |.| (emptyMover |+| b)
 
+{-
 --filter out moves by some predicate
 filterMv :: Mover -> (Move -> Bool) -> Mover
 filterMv m f = MkMover {runMover = \b -> do
     runMover m b
     modify $ filter f
     }
+-}
 
 --change the type of all moves
 retypeMv :: Mover -> AtomType -> Mover
 retypeMv m t = MkMover {runMover = \b -> do
     runMover m b
-    modify $ map (retypeMove t)
+    modify $ fmap (fmap $ retypeAtom t)
     }
 
 --iteratively apply the function f n times
@@ -86,23 +89,17 @@ freeN = iterN (|.?|)
 freeNStrict :: Int -> Mover -> Mover
 freeNStrict = iterN (|.|)
 
---repeat a mover until it does not change the list of moves
+--repeat a mover n times for all n
 free :: Mover -> Mover
-free m = MkMover {runMover = \b -> put [] >> runMover go b} where
-    go = MkMover {runMover = \b -> do
-        old <- get
-        runMover m b
-        new <- get
-        let filtered = (b ^. boardFilter) (old ++ new)
-        put filtered
-        when (filtered /= old) $ runMover go b
-    }
+free m = m |.?| free m
 
+--transform the vectors of a move as described by a given matrix
 transformMv :: [Vec] -> Mover -> Mover
 transformMv m mv = MkMover {runMover = \b -> do
     runMover mv b
-    modify $ map $ transformMove m
+    modify $ fmap (fmap $ transformAtom m)
     }
 
+--union of transforms from different matrices
 multiTransformMv :: [[Vec]] -> Mover -> Mover
 multiTransformMv ms mv = multiUnion $ map (`transformMv` mv) ms
