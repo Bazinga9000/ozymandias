@@ -18,11 +18,7 @@ instance Monad Rose where
 
 
 compose :: Rose a -> Rose a -> Rose a
-compose (Rose a as) b = Rose a (b : map (`compose` b) as)
+compose a b = composeMany a [b]
 
-flaggedUnion :: Eq a => a -> Rose a -> Rose a -> Rose a
-flaggedUnion flag ra@(Rose a as) rb@(Rose b bs)
-    | a == flag && b == flag = Rose flag (as ++ bs)
-    | a == flag = Rose flag (rb : as)
-    | b == flag = Rose flag (ra : bs)
-    | otherwise = Rose flag [ra,rb]
+composeMany :: Rose a -> [Rose a] -> Rose a
+composeMany (Rose a as) bs = Rose a (bs ++ map (`composeMany` bs) as)

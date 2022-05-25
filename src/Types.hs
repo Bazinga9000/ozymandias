@@ -18,13 +18,10 @@ retypeAtom t (Atom v _) = Atom v t
 transformAtom :: [Vec] -> Atom -> Atom
 transformAtom m (Atom v t) = Atom (Vec.transform m v) t
 
-type UnresolvedMoves = Rose (Maybe Atom)
+type UnresolvedMoves = [Rose (Maybe Atom)]
 
-singleton :: Vec -> UnresolvedMoves
-singleton v = return $ Just $ Atom v MoveTo
-
-union :: UnresolvedMoves -> UnresolvedMoves -> UnresolvedMoves
-union = flaggedUnion Nothing
+moveByVec :: Vec -> Rose (Maybe Atom)
+moveByVec v = return $ Just $ Atom v MoveTo
 
 type MoveMachine = RWS Pos () UnresolvedMoves
 newtype Mover = MkMover {runMover :: Board -> MoveMachine ()}
