@@ -27,6 +27,7 @@ library
   exposed-modules:
       Game
       Mover
+      Resolver
       Rose
       Types
       Vec

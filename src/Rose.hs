@@ -22,3 +22,9 @@ compose a b = composeMany a [b]
 
 composeMany :: Rose a -> [Rose a] -> Rose a
 composeMany (Rose a as) bs = Rose a (bs ++ map (`composeMany` bs) as)
+
+filterRose :: (Rose a -> Bool) -> Rose a -> Rose a
+filterRose f (Rose a as) = Rose a $ filterManyRoses f as
+
+filterManyRoses :: (Rose a -> Bool) -> [Rose a] -> [Rose a]
+filterManyRoses f as = map (filterRose f) $ filter f as

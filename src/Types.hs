@@ -10,18 +10,15 @@ import           Vec
 
 data AtomType = MoveTo | CaptureAt deriving Eq
 
-data Atom = Atom Vec AtomType deriving Eq
+data Atom = Atom AtomType Vec deriving Eq
 
 retypeAtom :: AtomType -> Atom -> Atom
-retypeAtom t (Atom v _) = Atom v t
+retypeAtom t (Atom _ v) = Atom t v
 
 transformAtom :: [Vec] -> Atom -> Atom
-transformAtom m (Atom v t) = Atom (Vec.transform m v) t
+transformAtom m (Atom t v) = Atom t (Vec.transform m v)
 
 type UnresolvedMoves = [Rose (Maybe Atom)]
-
-moveByVec :: Vec -> Rose (Maybe Atom)
-moveByVec v = return $ Just $ Atom v MoveTo
 
 type MoveMachine = RWS Pos () UnresolvedMoves
 newtype Mover = MkMover {runMover :: Board -> MoveMachine ()}
@@ -43,10 +40,20 @@ concatMoves (Move a) (Move b) = Move $ a ++ b
 fromP :: Pos -> Vec
 fromP (Pos p) = Vec p
 
-newtype Pos = Pos [Int]
+toP :: Vec -> Pos
+toP (Vec p) = Pos p
+
+addP :: Pos -> Vec -> Pos
+addP p v = toP $ fromP p .+ v
+
+newtype Pos = Pos [Int] deriving (Eq, Ord)
+
+newtype Square = Square {
+    _occupant :: Maybe Piece
+}
 
 data Board = Board {
-    _grid        :: M.Map Pos Piece,
+    _grid        :: M.Map Pos Square,
     _boardFilter :: [Move] -> [Move]
 }
 
@@ -56,3 +63,4 @@ newtype Piece = Piece {
 
 makeLenses ''Board
 makeLenses ''Piece
+makeLenses ''Square

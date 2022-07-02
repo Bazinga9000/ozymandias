@@ -30,7 +30,7 @@ universalMover = MkMover {runMover = \b ->
     }
 
 moveByVec :: Vec -> Rose (Maybe Atom)
-moveByVec v = return $ Just $ Atom v MoveTo
+moveByVec v = return $ Just $ Atom MoveTo v
 
 --mover with a single direction of movement
 leaper :: Vec -> Mover
