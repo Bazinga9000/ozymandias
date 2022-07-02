@@ -75,11 +75,11 @@ forkResolution board roses = do
     return $ concat newboards
 
 executeRose :: Board -> Rose (Maybe Atom) -> State Pos [Board]
-executeRose board (Rose Nothing _) = return [board]
+executeRose board (Rose Nothing _) = return []
 executeRose board (Rose (Just atom) roses) = do
     result <- executeAtom board atom
     case result of
-        Nothing       -> return [board]
+        Nothing       -> return []
         Just newboard -> forkResolution newboard roses
 
 
