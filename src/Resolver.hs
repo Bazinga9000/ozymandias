@@ -2,6 +2,7 @@ module Resolver where
 
 import           Control.Lens
 import           Control.Monad.State
+import           Control.Monad.RWS
 import qualified Data.Map            as M
 import           Data.Maybe
 import           Mover
@@ -85,3 +86,14 @@ executeRose board (Rose (Just atom) roses) = do
 
 resolveMoves :: Board -> UnresolvedMoves -> Pos -> [Board]
 resolveMoves board roses = evalState (forkResolution board roses)
+
+--new boards given by moving the piece at some position using some arbitrary mover
+resolveAtWithMover :: Board -> Pos -> Mover -> [Board]
+resolveAtWithMover board pos mover = resolveMoves board moves pos where
+    moves = fst $ execRWS (runMover mover board) pos []
+
+--new boards given by moving the piece at some position using its own mover
+resolveAt :: Board -> Pos -> Maybe [Board]
+resolveAt board pos = do
+    piece <- pieceAt board pos
+    return $ resolveAtWithMover board pos (piece ^. mover)

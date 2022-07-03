@@ -23,20 +23,6 @@ type UnresolvedMoves = [Rose (Maybe Atom)]
 type MoveMachine = RWS Pos () UnresolvedMoves
 newtype Mover = MkMover {runMover :: Board -> MoveMachine ()}
 
-newtype Move = Move [Atom] deriving Eq
-
-mapMove :: (Atom -> Atom) -> Move -> Move
-mapMove f (Move as) = Move $ map f as
-
-retypeMove :: AtomType -> Move -> Move
-retypeMove t = mapMove $ retypeAtom t
-
-transformMove :: [Vec] -> Move -> Move
-transformMove m = mapMove (transformAtom m)
-
-concatMoves :: Move -> Move -> Move
-concatMoves (Move a) (Move b) = Move $ a ++ b
-
 fromP :: Pos -> Vec
 fromP (Pos p) = Vec p
 
@@ -54,7 +40,7 @@ newtype Square = Square {
 
 data Board = Board {
     _grid        :: M.Map Pos Square,
-    _boardFilter :: [Move] -> [Move]
+    _boardFilter :: [Board] -> [Board]
 }
 
 newtype Piece = Piece {
