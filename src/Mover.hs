@@ -1,5 +1,6 @@
 module Mover where
 
+import           Atom
 import           Control.Lens
 import           Control.Monad
 import           Control.Monad.RWS
@@ -30,7 +31,7 @@ universalMover = MkMover {runMover = \b ->
     }
 
 moveByVec :: Vec -> Rose (Maybe Atom)
-moveByVec v = return $ Just $ Atom MoveTo v
+moveByVec v = return $ Just $ Move v
 
 --mover with a single direction of movement
 leaper :: Vec -> Mover
@@ -89,10 +90,6 @@ changeAllAtoms f m = MkMover {runMover = \b -> do
     runMover m b
     modify $ map $ fmap (fmap f)
 }
-
---change the type of all moves
-retypeMv :: Mover -> AtomType -> Mover
-retypeMv m t = changeAllAtoms (retypeAtom t) m
 
 --transform the vectors of a move as described by a given matrix
 transformMv :: [Vec] -> Mover -> Mover

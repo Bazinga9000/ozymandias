@@ -25,10 +25,12 @@ source-repository head
 
 library
   exposed-modules:
+      Atom
       Game
       Mover
       Resolver
       Rose
+      StateLang
       Types
       Vec
   other-modules:

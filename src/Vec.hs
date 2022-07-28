@@ -26,3 +26,14 @@ vsum = foldr (.+) vzero
 
 transform :: [Vec] -> Vec -> Vec
 transform vs (Vec x) = vsum $ zipWith (>*) x vs
+
+newtype Pos = Pos [Int] deriving (Eq, Ord, Show)
+
+fromP :: Pos -> Vec
+fromP (Pos p) = Vec p
+
+toP :: Vec -> Pos
+toP (Vec p) = Pos p
+
+addP :: Pos -> Vec -> Pos
+addP p v = toP $ fromP p .+ v
